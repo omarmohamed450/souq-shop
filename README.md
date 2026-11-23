@@ -91,8 +91,8 @@ Change these through the manager dashboard before using the project outside loca
 | `NODE_ENV` | `development` or `production` |
 | `MONGO_URI` | MongoDB connection string |
 | `JWT_SECRET` | Secret used to sign JWTs |
-| `ADMIN_USERNAME` | Optional seed username (default `admin`) |
-| `ADMIN_PASSWORD` | Optional seed password (default `password`) |
+| `ADMIN_USERNAME` | Optional seed username |
+| `ADMIN_PASSWORD` | Optional seed password |
 
 Stripe keys and SMTP credentials are **not** stored in `.env`. Managers configure them from the dashboard, and they are stored (encrypted) in the database.
 
