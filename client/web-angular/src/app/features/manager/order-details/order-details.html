@@ -1,0 +1,511 @@
+<div class="mx-auto w-full max-w-5xl space-y-6">
+  <a
+    routerLink="/manager/orders"
+    class="inline-flex items-center gap-2 text-sm font-bold text-stone-500 transition hover:text-teal-700"
+  >
+    <svg
+      class="h-4 w-4 rtl:rotate-180"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      aria-hidden="true"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12l7.5-7.5M21 12H3" />
+    </svg>
+    {{ 'manager.orderDetails.back' | translate }}
+  </a>
+
+  <header>
+    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-700">
+      {{ 'manager.label' | translate }}
+    </p>
+    <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-stone-900">
+      {{ 'manager.nav.orders' | translate }}
+    </h1>
+    <p class="mt-2 max-w-2xl text-sm leading-6 text-stone-500">
+      {{ 'manager.orderDetails.subtitle' | translate }}
+    </p>
+  </header>
+
+  @if (feedback(); as feedback) {
+    <p
+      class="rounded-2xl border px-5 py-3 text-sm font-semibold"
+      [class.border-emerald-200]="feedback.type === 'success'"
+      [class.bg-emerald-50]="feedback.type === 'success'"
+      [class.text-emerald-800]="feedback.type === 'success'"
+      [class.border-rose-200]="feedback.type === 'error'"
+      [class.bg-rose-50]="feedback.type === 'error'"
+      [class.text-rose-800]="feedback.type === 'error'"
+      role="status"
+      aria-live="polite"
+    >
+      {{ feedback.message }}
+    </p>
+  }
+
+  @if (loading()) {
+    <div class="space-y-4">
+      <div class="h-40 animate-pulse rounded-[1.75rem] bg-stone-200"></div>
+      <div class="grid gap-4 lg:grid-cols-2">
+        <div class="h-48 animate-pulse rounded-[1.75rem] bg-stone-200"></div>
+        <div class="h-48 animate-pulse rounded-[1.75rem] bg-stone-200"></div>
+      </div>
+      <div class="h-64 animate-pulse rounded-[1.75rem] bg-stone-200"></div>
+    </div>
+  } @else if (notFound()) {
+    <div class="rounded-[2rem] border border-stone-200 bg-white p-10 text-center">
+      <p class="text-lg font-bold text-stone-900">{{ 'manager.orderDetails.notFound' | translate }}</p>
+      <a
+        routerLink="/manager/orders"
+        class="mt-5 inline-flex rounded-full bg-teal-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800"
+      >
+        {{ 'manager.orderDetails.back' | translate }}
+      </a>
+    </div>
+  } @else if (error()) {
+    <div class="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-8 text-center">
+      <p class="font-bold text-rose-800">{{ 'manager.orderDetails.loadError' | translate }}</p>
+      <button
+        type="button"
+        class="mt-4 rounded-full bg-rose-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-rose-800"
+        (click)="retry()"
+      >
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (order(); as order) {
+    <article
+      class="overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white shadow-sm"
+    >
+      <div class="flex flex-col gap-5 bg-stone-950 p-6 text-white sm:flex-row sm:items-start sm:justify-between sm:p-8">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300">
+            {{ 'manager.orders.reference' | translate }}
+          </p>
+          <h2 class="mt-2 text-3xl font-extrabold tracking-tight">{{ order.referenceNumber }}</h2>
+          <p class="mt-2 text-xs font-semibold text-stone-400">{{ formatDate(order.createdAt) }}</p>
+        </div>
+
+        <div class="flex flex-col items-start gap-3 sm:items-end">
+          <div class="flex flex-wrap gap-2 sm:justify-end">
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide ring-1"
+              [class.bg-emerald-400]="order.status === 'opened'"
+              [class.text-stone-950]="order.status === 'opened'"
+              [class.ring-emerald-300]="order.status === 'opened'"
+              [class.bg-sky-400]="order.status === 'in-transit'"
+              [class.text-stone-950]="order.status === 'in-transit'"
+              [class.ring-sky-300]="order.status === 'in-transit'"
+              [class.bg-stone-800]="order.status === 'closed'"
+              [class.text-stone-300]="order.status === 'closed'"
+              [class.ring-stone-700]="order.status === 'closed'"
+            >
+              <span
+                class="h-1.5 w-1.5 rounded-full"
+                [class.bg-emerald-400]="order.status === 'opened'"
+                [class.bg-sky-400]="order.status === 'in-transit'"
+                [class.bg-stone-400]="order.status === 'closed'"
+              ></span>
+              {{ statusLabelKey(order.status) | translate }}
+            </span>
+            <span
+              class="inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide ring-1"
+              [class.bg-emerald-400]="order.paymentStatus === 'paid'"
+              [class.text-stone-950]="order.paymentStatus === 'paid'"
+              [class.ring-emerald-300]="order.paymentStatus === 'paid'"
+              [class.bg-amber-300]="order.paymentStatus === 'pending'"
+              [class.text-stone-950]="order.paymentStatus === 'pending'"
+              [class.ring-amber-200]="order.paymentStatus === 'pending'"
+              [class.bg-rose-400]="order.paymentStatus === 'failed'"
+              [class.text-stone-950]="order.paymentStatus === 'failed'"
+              [class.ring-rose-300]="order.paymentStatus === 'failed'"
+            >
+              {{ paymentLabelKey(order) | translate }}
+            </span>
+            <span
+              class="inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide ring-1"
+              [class.bg-emerald-400]="order.approvalStatus === 'approved'"
+              [class.text-stone-950]="order.approvalStatus === 'approved'"
+              [class.ring-emerald-300]="order.approvalStatus === 'approved'"
+              [class.bg-amber-300]="order.approvalStatus === 'pending'"
+              [class.text-stone-950]="order.approvalStatus === 'pending'"
+              [class.ring-amber-200]="order.approvalStatus === 'pending'"
+              [class.bg-rose-400]="order.approvalStatus === 'rejected'"
+              [class.text-stone-950]="order.approvalStatus === 'rejected'"
+              [class.ring-rose-300]="order.approvalStatus === 'rejected'"
+            >
+              {{ approvalLabelKey(order) | translate }}
+            </span>
+          </div>
+
+          <div class="flex flex-wrap gap-2 sm:justify-end">
+            @if (order.approvalStatus === 'pending') {
+              <button
+                type="button"
+                class="rounded-full bg-emerald-500 px-4 py-2 text-xs font-bold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-stone-700 disabled:text-stone-400"
+                [disabled]="updating() || !canApprove(order)"
+                [title]="(!canApprove(order) ? 'manager.orders.approveRequiresPayment' : '') | translate"
+                (click)="approveOrder()"
+              >
+                {{ 'manager.orders.approve' | translate }}
+              </button>
+              <button
+                type="button"
+                class="rounded-full border border-rose-300/40 bg-rose-500/10 px-4 py-2 text-xs font-bold text-rose-200 transition hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                [disabled]="updating()"
+                (click)="rejectOrder()"
+              >
+                {{ 'manager.orders.reject' | translate }}
+              </button>
+            }
+            <button
+              type="button"
+              class="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+              [disabled]="updating()"
+              (click)="toggleStatus()"
+            >
+              {{ statusActionKey(order.status) | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-6 p-6 sm:p-8 lg:grid-cols-2">
+        <section class="rounded-[1.5rem] border border-stone-200/80 bg-stone-50/50 p-5">
+          <h3 class="text-sm font-bold text-stone-900">
+            {{ 'manager.orderDetails.customerInfo' | translate }}
+          </h3>
+
+          <dl class="mt-4 space-y-4 text-sm">
+            <div>
+              <dt class="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400">
+                {{ 'manager.orderDetails.name' | translate }}
+              </dt>
+              <dd class="mt-1 font-bold text-stone-900">{{ order.customer.name }}</dd>
+            </div>
+            <div>
+              <dt class="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400">
+                {{ 'manager.orderDetails.phone' | translate }}
+              </dt>
+              <dd class="mt-1 font-semibold text-stone-800">
+                <a [href]="'tel:' + order.customer.phone" class="hover:text-teal-700">
+                  {{ order.customer.phone }}
+                </a>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400">
+                {{ 'manager.orderDetails.email' | translate }}
+              </dt>
+              <dd class="mt-1 break-all font-semibold text-stone-800">
+                <a [href]="'mailto:' + order.customer.email" class="hover:text-teal-700">
+                  {{ order.customer.email }}
+                </a>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400">
+                {{ 'manager.orderDetails.address' | translate }}
+              </dt>
+              <dd class="mt-1 whitespace-pre-line leading-6 text-stone-700">
+                {{ order.customer.address }}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="rounded-[1.5rem] border border-stone-200/80 bg-stone-50/50 p-5">
+          <h3 class="text-sm font-bold text-stone-900">
+            {{ 'manager.orderDetails.notes' | translate }}
+          </h3>
+          <p class="mt-4 whitespace-pre-line text-sm leading-7 text-stone-600" dir="auto">
+            {{ order.notes || ('manager.orderDetails.noNotes' | translate) }}
+          </p>
+        </section>
+      </div>
+
+      <section class="border-t border-stone-200/80 p-6 sm:p-8">
+        <h3 class="text-sm font-bold text-stone-900">
+          {{ 'manager.orderDetails.paymentTitle' | translate }}
+        </h3>
+
+        <dl class="mt-4 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+          <div class="rounded-2xl border border-stone-200 bg-stone-50/50 p-4">
+            <dt class="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400">
+              {{ 'manager.orderDetails.paymentStatus' | translate }}
+            </dt>
+            <dd class="mt-1 font-bold text-stone-900">
+              {{ paymentLabelKey(order) | translate }}
+            </dd>
+          </div>
+          <div class="rounded-2xl border border-stone-200 bg-stone-50/50 p-4">
+            <dt class="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400">
+              {{ 'manager.orderDetails.approvalStatus' | translate }}
+            </dt>
+            <dd class="mt-1 font-bold text-stone-900">
+              {{ approvalLabelKey(order) | translate }}
+            </dd>
+          </div>
+          <div class="rounded-2xl border border-stone-200 bg-stone-50/50 p-4">
+            <dt class="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400">
+              {{ 'manager.orderDetails.stockStatus' | translate }}
+            </dt>
+            <dd class="mt-1 font-bold" [class.text-emerald-700]="order.stockDeducted" [class.text-amber-700]="!order.stockDeducted">
+              {{ (order.stockDeducted ? 'manager.orderDetails.stockDeducted' : 'manager.orderDetails.stockPending') | translate }}
+            </dd>
+          </div>
+          <div class="rounded-2xl border border-stone-200 bg-stone-50/50 p-4">
+            <dt class="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400">
+              {{ 'manager.orderDetails.paidAt' | translate }}
+            </dt>
+            <dd class="mt-1 font-semibold text-stone-800">
+              {{ order.paidAt ? formatDate(order.paidAt) : ('manager.orderDetails.notPaid' | translate) }}
+            </dd>
+          </div>
+          <div class="rounded-2xl border border-stone-200 bg-stone-50/50 p-4">
+            <dt class="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400">
+              {{ 'manager.orderDetails.confirmationEmail' | translate }}
+            </dt>
+            <dd class="mt-1 font-semibold text-stone-800">
+              {{ order.confirmationEmailSentAt ? formatDate(order.confirmationEmailSentAt) : ('manager.orderDetails.emailNotSent' | translate) }}
+            </dd>
+          </div>
+          <div class="rounded-2xl border border-stone-200 bg-stone-50/50 p-4">
+            <dt class="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400">
+              {{ 'manager.orderDetails.stripeReference' | translate }}
+            </dt>
+            <dd class="mt-1 break-all font-mono text-xs font-semibold text-stone-600">
+              {{ order.stripePaymentIntentId || order.stripeSessionId || ('manager.orderDetails.notAvailable' | translate) }}
+            </dd>
+          </div>
+        </dl>
+
+        @if (order.approvalError) {
+          <p class="mt-4 rounded-2xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700">
+            {{ 'manager.orderDetails.approvalError' | translate }}: {{ order.approvalError }}
+          </p>
+        }
+
+        @if (order.paymentFailureReason) {
+          <p class="mt-4 rounded-2xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700">
+            {{ 'manager.orderDetails.paymentError' | translate }}: {{ order.paymentFailureReason }}
+          </p>
+        }
+
+        @if (order.confirmationEmailError) {
+          <p class="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800">
+            {{ 'manager.orderDetails.emailError' | translate }}: {{ order.confirmationEmailError }}
+          </p>
+        }
+      </section>
+
+      <section class="border-t border-stone-200/80 bg-teal-50/30 p-6 sm:p-8">
+        <div class="flex items-start gap-3">
+          <span
+            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-700 text-white"
+          >
+            <svg
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M16.5 3.75h-9A2.25 2.25 0 005.25 6v12A2.25 2.25 0 007.5 20.25h9A2.25 2.25 0 0018.75 18V6a2.25 2.25 0 00-2.25-2.25zM8.25 8.25h7.5m-7.5 3h7.5m-7.5 3h4.5"
+              />
+            </svg>
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-bold text-stone-900">
+                {{ 'manager.orderDetails.managerNotes' | translate }}
+              </h3>
+              <span
+                class="rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold text-teal-800 ring-1 ring-teal-200"
+              >
+                {{ managerNotes().length }}
+              </span>
+            </div>
+            <p class="mt-1 max-w-xl text-xs leading-5 text-stone-500">
+              {{ 'manager.orderDetails.managerNotesHint' | translate }}
+            </p>
+          </div>
+        </div>
+
+        <form
+          [formGroup]="noteForm"
+          (ngSubmit)="addNote()"
+          novalidate
+          class="mt-5 rounded-2xl border border-teal-100 bg-white p-4 shadow-sm sm:p-5"
+        >
+          <label for="manager-note" class="sr-only">
+            {{ 'manager.orderDetails.managerNotes' | translate }}
+          </label>
+          <textarea
+            id="manager-note"
+            rows="3"
+            formControlName="text"
+            maxlength="1000"
+            dir="auto"
+            [placeholder]="'manager.orderDetails.notePlaceholder' | translate"
+            class="w-full resize-y rounded-xl border bg-stone-50/60 px-4 py-3 text-sm leading-6 text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+            [class.border-stone-200]="!noteControl.touched || noteControl.valid"
+            [class.border-rose-300]="noteControl.touched && noteControl.invalid"
+          ></textarea>
+
+          @if (noteControl.touched && noteControl.invalid) {
+            <p class="mt-1.5 text-xs font-semibold text-rose-600">
+              {{ (noteControl.hasError('required') ? 'manager.orderDetails.noteRequired' : 'manager.orderDetails.noteMaxLength') | translate }}
+            </p>
+          }
+
+          @if (noteError()) {
+            <p
+              class="mt-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700"
+              role="alert"
+            >
+              {{ noteError() }}
+            </p>
+          }
+
+          <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <span class="text-[11px] font-semibold text-stone-400">
+              {{ noteControl.value.length }}/1000
+            </span>
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 rounded-full bg-teal-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+              [disabled]="savingNote()"
+            >
+              @if (savingNote()) {
+                <span
+                  class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+                  aria-hidden="true"
+                ></span>
+              } @else {
+                <svg
+                  class="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              }
+              {{ (savingNote() ? 'manager.orderDetails.savingNote' : 'manager.orderDetails.addNote') | translate }}
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-5 space-y-3">
+          @if (managerNotes().length === 0) {
+            <div class="rounded-2xl border border-dashed border-teal-200 bg-white/70 p-6 text-center">
+              <p class="text-sm font-bold text-stone-700">
+                {{ 'manager.orderDetails.noManagerNotes' | translate }}
+              </p>
+              <p class="mt-1 text-xs text-stone-500">
+                {{ 'manager.orderDetails.noManagerNotesHint' | translate }}
+              </p>
+            </div>
+          } @else {
+            @for (note of managerNotes(); track note._id) {
+              <article class="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+                <div class="flex items-center gap-2 text-[11px] font-semibold text-stone-400">
+                  <svg
+                    class="h-3.5 w-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"
+                    />
+                  </svg>
+                  <time [attr.datetime]="note.createdAt">{{ formatDate(note.createdAt) }}</time>
+                </div>
+                <p class="mt-2 whitespace-pre-line text-sm leading-7 text-stone-700" dir="auto">
+                  {{ note.text }}
+                </p>
+              </article>
+            }
+          }
+        </div>
+      </section>
+
+      <section class="border-t border-stone-200/80 p-6 sm:p-8">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <h3 class="text-sm font-bold text-stone-900">
+            {{ 'manager.orderDetails.items' | translate }}
+          </h3>
+          <p class="text-xs font-semibold text-stone-500">
+            {{ 'manager.orders.itemsCount' | translate: { count: itemCount(order) } }}
+          </p>
+        </div>
+
+        <div class="mt-4 overflow-hidden rounded-2xl border border-stone-200">
+          <div
+            class="hidden grid-cols-[1fr_120px_100px_140px] gap-4 border-b border-stone-200 bg-stone-50 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400 sm:grid"
+          >
+            <span>{{ 'manager.orderDetails.item' | translate }}</span>
+            <span>{{ 'manager.orderDetails.price' | translate }}</span>
+            <span>{{ 'manager.orderDetails.quantity' | translate }}</span>
+            <span class="text-end">{{ 'manager.orderDetails.lineTotal' | translate }}</span>
+          </div>
+
+          @for (line of order.items; track line.item) {
+            <div
+              class="grid gap-3 border-b border-stone-100 px-4 py-4 last:border-b-0 sm:grid-cols-[1fr_120px_100px_140px] sm:items-center sm:gap-4"
+            >
+              <p class="font-bold text-stone-900">{{ line.name }}</p>
+
+              <div class="flex items-center justify-between gap-3 text-sm sm:block">
+                <span class="text-[10px] font-bold uppercase tracking-wide text-stone-400 sm:hidden">
+                  {{ 'manager.orderDetails.price' | translate }}
+                </span>
+                <span class="font-semibold text-stone-700">
+                  {{ line.price | number: '1.0-2' }} {{ 'common.currency' | translate }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between gap-3 text-sm sm:block">
+                <span class="text-[10px] font-bold uppercase tracking-wide text-stone-400 sm:hidden">
+                  {{ 'manager.orderDetails.quantity' | translate }}
+                </span>
+                <span class="font-semibold text-stone-700">{{ line.quantity }}</span>
+              </div>
+
+              <div class="flex items-center justify-between gap-3 text-sm sm:block sm:text-end">
+                <span class="text-[10px] font-bold uppercase tracking-wide text-stone-400 sm:hidden">
+                  {{ 'manager.orderDetails.lineTotal' | translate }}
+                </span>
+                <span class="font-extrabold text-stone-900">
+                  {{ line.price * line.quantity | number: '1.0-2' }}
+                  {{ 'common.currency' | translate }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="mt-5 flex items-center justify-between gap-3 rounded-2xl bg-stone-900 px-5 py-4 text-white">
+          <span class="text-sm font-bold">{{ 'manager.orderDetails.total' | translate }}</span>
+          <span class="text-xl font-extrabold">
+            {{ order.totalPrice | number: '1.0-2' }}
+            <span class="text-xs font-bold text-stone-400">{{ 'common.currency' | translate }}</span>
+          </span>
+        </div>
+      </section>
+    </article>
+  }
+</div>

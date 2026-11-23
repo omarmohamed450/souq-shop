@@ -1,0 +1,271 @@
+<div class="mx-auto w-full max-w-7xl space-y-6">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-700">
+        {{ 'manager.label' | translate }}
+      </p>
+      <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-stone-900">
+        {{ 'manager.nav.emailTemplates' | translate }}
+      </h1>
+      <p class="mt-2 max-w-2xl text-sm leading-6 text-stone-500">
+        {{ 'manager.emailTemplates.subtitle' | translate }}
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="inline-flex items-center justify-center gap-2 rounded-full bg-teal-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-teal-900/20 transition hover:bg-teal-800"
+      (click)="startCreate()"
+    >
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      {{ 'manager.emailTemplates.create' | translate }}
+    </button>
+  </header>
+
+  @if (feedback(); as feedback) {
+    <p
+      class="rounded-2xl border px-5 py-3 text-sm font-semibold"
+      [class.border-emerald-200]="feedback.type === 'success'"
+      [class.bg-emerald-50]="feedback.type === 'success'"
+      [class.text-emerald-800]="feedback.type === 'success'"
+      [class.border-rose-200]="feedback.type === 'error'"
+      [class.bg-rose-50]="feedback.type === 'error'"
+      [class.text-rose-800]="feedback.type === 'error'"
+      role="status"
+      aria-live="polite"
+    >
+      {{ feedback.message }}
+    </p>
+  }
+
+  @if (formOpen()) {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      novalidate
+      class="rounded-[1.75rem] border border-teal-100 bg-white p-6 shadow-sm sm:p-8"
+    >
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-stone-900">
+            {{ (editingId() ? 'manager.emailTemplates.editTitle' : 'manager.emailTemplates.createTitle') | translate }}
+          </h2>
+          <p class="mt-1 text-sm text-stone-500">
+            {{ 'manager.emailTemplates.formHint' | translate }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="rounded-full border border-stone-200 px-4 py-2 text-xs font-bold text-stone-600 transition hover:bg-stone-50"
+          (click)="cancelForm()"
+        >
+          {{ 'manager.emailTemplates.cancel' | translate }}
+        </button>
+      </div>
+
+      <div class="mt-6 grid gap-5 sm:grid-cols-2">
+        <div>
+          <label for="template-key" class="mb-1.5 block text-xs font-bold text-stone-600">
+            {{ 'manager.emailTemplates.key' | translate }}
+          </label>
+          <input
+            id="template-key"
+            type="text"
+            formControlName="key"
+            placeholder="order_confirmation"
+            class="w-full rounded-2xl border bg-stone-50/60 px-4 py-3 font-mono text-sm text-stone-900 outline-none transition focus:border-teal-500 focus:bg-white"
+            [class.border-stone-200]="!keyControl.touched || keyControl.valid"
+            [class.border-rose-300]="keyControl.touched && keyControl.invalid"
+          />
+          @if (keyControl.touched && keyControl.invalid) {
+            <p class="mt-1.5 text-xs font-semibold text-rose-600">
+              {{ 'manager.emailTemplates.keyInvalid' | translate }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="template-name" class="mb-1.5 block text-xs font-bold text-stone-600">
+            {{ 'manager.emailTemplates.name' | translate }}
+          </label>
+          <input
+            id="template-name"
+            type="text"
+            formControlName="name"
+            class="w-full rounded-2xl border bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-teal-500 focus:bg-white"
+            [class.border-stone-200]="!nameControl.touched || nameControl.valid"
+            [class.border-rose-300]="nameControl.touched && nameControl.invalid"
+          />
+          @if (nameControl.touched && nameControl.invalid) {
+            <p class="mt-1.5 text-xs font-semibold text-rose-600">
+              {{ 'manager.emailTemplates.required' | translate }}
+            </p>
+          }
+        </div>
+
+        <div class="sm:col-span-2">
+          <label for="template-subject" class="mb-1.5 block text-xs font-bold text-stone-600">
+            {{ 'manager.emailTemplates.subject' | translate }}
+          </label>
+          <input
+            id="template-subject"
+            type="text"
+            formControlName="subject"
+            dir="auto"
+            class="w-full rounded-2xl border bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-teal-500 focus:bg-white"
+            [class.border-stone-200]="!subjectControl.touched || subjectControl.valid"
+            [class.border-rose-300]="subjectControl.touched && subjectControl.invalid"
+          />
+          @if (subjectControl.touched && subjectControl.invalid) {
+            <p class="mt-1.5 text-xs font-semibold text-rose-600">
+              {{ 'manager.emailTemplates.required' | translate }}
+            </p>
+          }
+        </div>
+
+        <div class="sm:col-span-2">
+          <label for="template-body" class="mb-1.5 block text-xs font-bold text-stone-600">
+            {{ 'manager.emailTemplates.body' | translate }}
+          </label>
+          <textarea
+            id="template-body"
+            rows="12"
+            formControlName="body"
+            dir="auto"
+            class="w-full resize-y rounded-2xl border bg-stone-50/60 px-4 py-3 font-mono text-sm leading-6 text-stone-900 outline-none transition focus:border-teal-500 focus:bg-white"
+            [class.border-stone-200]="!bodyControl.touched || bodyControl.valid"
+            [class.border-rose-300]="bodyControl.touched && bodyControl.invalid"
+          ></textarea>
+          @if (bodyControl.touched && bodyControl.invalid) {
+            <p class="mt-1.5 text-xs font-semibold text-rose-600">
+              {{ 'manager.emailTemplates.required' | translate }}
+            </p>
+          }
+        </div>
+
+        <div class="sm:col-span-2">
+          <label for="template-description" class="mb-1.5 block text-xs font-bold text-stone-600">
+            {{ 'manager.emailTemplates.description' | translate }}
+          </label>
+          <input
+            id="template-description"
+            type="text"
+            formControlName="description"
+            class="w-full rounded-2xl border border-stone-200 bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-teal-500 focus:bg-white"
+          />
+        </div>
+      </div>
+
+      <div class="mt-5 rounded-2xl border border-stone-200 bg-stone-50/60 p-4">
+        <p class="text-xs font-bold uppercase tracking-[0.16em] text-stone-400">
+          {{ 'manager.emailTemplates.placeholders' | translate }}
+        </p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          @for (placeholder of placeholders(); track placeholder) {
+            <code class="rounded-full bg-white px-2.5 py-1 font-mono text-[11px] font-semibold text-teal-800 ring-1 ring-stone-200">
+              {{ placeholderText(placeholder) }}
+            </code>
+          }
+        </div>
+      </div>
+
+      <div class="mt-5 flex justify-end">
+        <button
+          type="submit"
+          class="inline-flex items-center gap-2 rounded-full bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-sm shadow-teal-900/20 transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="saving()"
+        >
+          @if (saving()) {
+            <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true"></span>
+          }
+          {{ (saving() ? 'manager.emailTemplates.saving' : 'manager.emailTemplates.save') | translate }}
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (loading()) {
+    <div class="grid gap-4 md:grid-cols-2">
+      @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+        <div class="h-56 animate-pulse rounded-[1.5rem] bg-stone-200"></div>
+      }
+    </div>
+  } @else if (loadError()) {
+    <div class="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-8 text-center">
+      <p class="font-bold text-rose-800">{{ 'manager.emailTemplates.loadError' | translate }}</p>
+      <button
+        type="button"
+        class="mt-4 rounded-full bg-rose-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-rose-800"
+        (click)="loadTemplates()"
+      >
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (templates().length === 0) {
+    <div class="rounded-[2rem] border border-dashed border-stone-300 bg-white/60 p-12 text-center">
+      <p class="text-lg font-bold text-stone-900">{{ 'manager.emailTemplates.empty' | translate }}</p>
+      <p class="mt-2 text-sm text-stone-500">{{ 'manager.emailTemplates.emptyHint' | translate }}</p>
+      <button
+        type="button"
+        class="mt-5 rounded-full bg-teal-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800"
+        (click)="startCreate()"
+      >
+        {{ 'manager.emailTemplates.create' | translate }}
+      </button>
+    </div>
+  } @else {
+    <div class="grid gap-4 md:grid-cols-2">
+      @for (template of templates(); track template._id) {
+        <article class="flex flex-col rounded-[1.5rem] border border-stone-200/80 bg-white p-5 shadow-sm">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="truncate text-lg font-extrabold text-stone-900">{{ template.name }}</h2>
+                @if (template.isSystem) {
+                  <span class="rounded-full bg-teal-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-teal-700 ring-1 ring-teal-200">
+                    {{ 'manager.emailTemplates.system' | translate }}
+                  </span>
+                }
+              </div>
+              <code class="mt-1 block truncate font-mono text-xs font-semibold text-stone-400">
+                {{ template.key }}
+              </code>
+            </div>
+          </div>
+
+          <p class="mt-3 text-sm font-semibold text-stone-700" dir="auto">{{ template.subject }}</p>
+          @if (template.description) {
+            <p class="mt-1 text-xs leading-5 text-stone-500">{{ template.description }}</p>
+          }
+
+          <p class="mt-3 line-clamp-3 whitespace-pre-line text-xs leading-5 text-stone-500" dir="auto">
+            {{ template.body }}
+          </p>
+
+          <div class="mt-auto flex items-center justify-between gap-3 border-t border-stone-100 pt-4">
+            <span class="text-[11px] font-semibold text-stone-400">{{ formatDate(template.updatedAt) }}</span>
+            <div class="flex gap-2">
+              <button
+                type="button"
+                class="rounded-full border border-stone-200 px-4 py-2 text-xs font-bold text-stone-600 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-800"
+                (click)="startEdit(template)"
+              >
+                {{ 'manager.emailTemplates.edit' | translate }}
+              </button>
+              <button
+                type="button"
+                class="rounded-full border border-rose-200 px-4 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-50 disabled:opacity-50"
+                [disabled]="deletingId() === template._id"
+                (click)="deleteTemplate(template)"
+              >
+                {{ (deletingId() === template._id ? 'manager.emailTemplates.deleting' : 'manager.emailTemplates.delete') | translate }}
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>

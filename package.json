@@ -1,0 +1,29 @@
+{
+  "name": "souq-shop",
+  "version": "1.0.0",
+  "description": "Souq - Full-stack online store (Node.js, Express, MongoDB, Angular)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node scripts/seedAdmin.js",
+    "seed:demo": "node scripts/seedDemoData.js",
+    "seed:email-templates": "node scripts/seedEmailTemplates.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.3",
+    "express-validator": "^7.3.2",
+    "helmet": "^7.2.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.24.7",
+    "multer": "^2.5.0",
+    "nodemailer": "^10.3.1",
+    "stripe": "^23.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

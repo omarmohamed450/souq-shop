@@ -1,0 +1,99 @@
+<article
+  class="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-stone-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-teal-200/80 hover:shadow-xl hover:shadow-stone-900/5"
+>
+  <div class="relative aspect-[4/3] overflow-hidden bg-stone-100">
+    @if (item().imageUrl && !imageFailed()) {
+      <img
+        [src]="item().imageUrl"
+        [alt]="item().name"
+        loading="lazy"
+        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        (error)="imageFailed.set(true)"
+      />
+    } @else {
+      <div
+        class="grid h-full w-full place-items-center bg-[radial-gradient(circle_at_30%_20%,#ccfbf1_0%,#f5f5f4_45%,#e7e5e4_100%)]"
+      >
+        <span class="text-5xl font-extrabold text-teal-800/30">س</span>
+      </div>
+    }
+
+    <button
+      type="button"
+      class="absolute end-3 top-3 grid h-10 w-10 place-items-center rounded-full border border-white/70 bg-white/90 text-stone-600 shadow-sm backdrop-blur transition hover:scale-105 hover:text-rose-600"
+      [class.text-rose-600]="favorites.isFavorite(item()._id)"
+      [attr.aria-pressed]="favorites.isFavorite(item()._id)"
+      [attr.aria-label]="
+        (favorites.isFavorite(item()._id) ? 'items.favoriteRemove' : 'items.favoriteAdd')
+          | translate
+      "
+      (click)="favorites.toggle(item()._id)"
+    >
+      <svg
+        class="h-5 w-5"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="1.8"
+        [attr.fill]="favorites.isFavorite(item()._id) ? 'currentColor' : 'none'"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+        />
+      </svg>
+    </button>
+
+    @if (!item().isAvailable) {
+      <span
+        class="absolute start-3 top-3 rounded-full bg-stone-900/85 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur"
+      >
+        {{ 'items.unavailable' | translate }}
+      </span>
+    }
+  </div>
+
+  <div class="flex flex-1 flex-col p-5">
+    @if (item().categories.length > 0) {
+      <div class="flex flex-wrap gap-1.5">
+        @for (category of item().categories; track category._id) {
+          <span
+            class="rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-stone-600"
+          >
+            {{ category.name }}
+          </span>
+        }
+      </div>
+    }
+
+    <h3 class="mt-3 text-lg font-bold leading-snug text-stone-900">
+      <a
+        [routerLink]="['/items', item()._id]"
+        class="transition hover:text-teal-700"
+      >
+        {{ item().name }}
+      </a>
+    </h3>
+
+    <p class="mt-2 line-clamp-2 text-sm leading-6 text-stone-500">
+      {{ item().description }}
+    </p>
+
+    <div class="mt-auto flex items-end justify-between gap-3 pt-5">
+      <p class="text-lg font-extrabold text-stone-900">
+        {{ item().price | number: '1.0-2' }}
+        <span class="text-xs font-bold text-stone-500">{{ 'common.currency' | translate }}</span>
+      </p>
+
+      <button
+        type="button"
+        class="rounded-full bg-teal-700 px-4 py-2 text-xs font-bold text-white shadow-sm shadow-teal-900/20 transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500 disabled:shadow-none"
+        [disabled]="!item().isAvailable"
+        (click)="cart.add(item()._id)"
+      >
+        {{ 'items.addToCart' | translate }}
+      </button>
+    </div>
+  </div>
+</article>

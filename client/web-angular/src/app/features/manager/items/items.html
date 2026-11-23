@@ -1,0 +1,486 @@
+<div class="mx-auto w-full max-w-7xl space-y-6">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-700">
+        {{ 'manager.label' | translate }}
+      </p>
+      <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-stone-900">
+        {{ 'manager.nav.items' | translate }}
+      </h1>
+      <p class="mt-2 max-w-2xl text-sm leading-6 text-stone-500">
+        {{ 'manager.items.subtitle' | translate }}
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="inline-flex items-center justify-center gap-2 rounded-full bg-teal-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-teal-900/20 transition hover:bg-teal-800"
+      (click)="startCreate()"
+    >
+      <svg
+        class="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      {{ 'manager.items.new' | translate }}
+    </button>
+  </header>
+
+  @if (feedback(); as feedback) {
+    <p
+      class="rounded-2xl border px-5 py-3 text-sm font-semibold"
+      [class.border-emerald-200]="feedback.type === 'success'"
+      [class.bg-emerald-50]="feedback.type === 'success'"
+      [class.text-emerald-800]="feedback.type === 'success'"
+      [class.border-rose-200]="feedback.type === 'error'"
+      [class.bg-rose-50]="feedback.type === 'error'"
+      [class.text-rose-800]="feedback.type === 'error'"
+      role="status"
+      aria-live="polite"
+    >
+      {{ feedback.message }}
+    </p>
+  }
+
+  @if (formOpen()) {
+    <section
+      id="item-form"
+      class="scroll-mt-24 rounded-[1.75rem] border border-teal-200/70 bg-white p-6 shadow-sm sm:p-8"
+    >
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-teal-700">
+            {{ (editingItem() ? 'manager.items.edit' : 'manager.items.new') | translate }}
+          </p>
+          <h2 class="mt-2 text-xl font-bold text-stone-900">
+            {{ (editingItem() ? 'manager.items.edit' : 'manager.items.new') | translate }}
+          </h2>
+        </div>
+        <button
+          type="button"
+          class="grid h-9 w-9 place-items-center rounded-full text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+          [attr.aria-label]="'common.close' | translate"
+          (click)="cancelForm()"
+        >
+          <svg
+            class="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form class="mt-6 space-y-6" [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <label for="item-name" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.items.name' | translate }}
+            </label>
+            <input
+              id="item-name"
+              type="text"
+              formControlName="name"
+              [placeholder]="'manager.items.namePlaceholder' | translate"
+              class="w-full rounded-2xl border bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+              [class.border-stone-200]="!nameControl.touched || nameControl.valid"
+              [class.border-rose-300]="nameControl.touched && nameControl.invalid"
+            />
+            @if (nameControl.touched && nameControl.invalid) {
+              <p class="mt-1.5 text-xs font-semibold text-rose-600">
+                {{ (nameControl.hasError('required') ? 'common.required' : 'common.invalid') | translate }}
+              </p>
+            }
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label for="item-price" class="mb-1.5 block text-xs font-bold text-stone-600">
+                {{ 'manager.items.price' | translate }}
+              </label>
+              <input
+                id="item-price"
+                type="number"
+                min="0"
+                step="0.01"
+                formControlName="price"
+                class="w-full rounded-2xl border bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-teal-500 focus:bg-white"
+                [class.border-stone-200]="!priceControl.touched || priceControl.valid"
+                [class.border-rose-300]="priceControl.touched && priceControl.invalid"
+              />
+              @if (priceControl.touched && priceControl.invalid) {
+                <p class="mt-1.5 text-xs font-semibold text-rose-600">
+                  {{ (priceControl.hasError('required') ? 'common.required' : 'common.invalid') | translate }}
+                </p>
+              }
+            </div>
+
+            <div>
+              <label for="item-quantity" class="mb-1.5 block text-xs font-bold text-stone-600">
+                {{ 'manager.items.quantity' | translate }}
+              </label>
+              <input
+                id="item-quantity"
+                type="number"
+                min="0"
+                step="1"
+                formControlName="quantity"
+                class="w-full rounded-2xl border bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-teal-500 focus:bg-white"
+                [class.border-stone-200]="!quantityControl.touched || quantityControl.valid"
+                [class.border-rose-300]="quantityControl.touched && quantityControl.invalid"
+              />
+              <p class="mt-1.5 text-[11px] font-semibold text-stone-400">
+                {{ 'manager.items.quantityHint' | translate }}
+              </p>
+              @if (quantityControl.touched && quantityControl.invalid) {
+                <p class="mt-1.5 text-xs font-semibold text-rose-600">
+                  {{ (quantityControl.hasError('required') ? 'common.required' : 'common.invalid') | translate }}
+                </p>
+              }
+            </div>
+          </div>
+
+          <div class="md:col-span-2">
+            <label for="item-description" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.items.description' | translate }}
+            </label>
+            <textarea
+              id="item-description"
+              rows="4"
+              formControlName="description"
+              [placeholder]="'manager.items.descriptionPlaceholder' | translate"
+              class="w-full resize-none rounded-2xl border bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+              [class.border-stone-200]="!descriptionControl.touched || descriptionControl.valid"
+              [class.border-rose-300]="descriptionControl.touched && descriptionControl.invalid"
+            ></textarea>
+          </div>
+
+          <fieldset class="md:col-span-2">
+            <legend class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.items.categories' | translate }}
+            </legend>
+            <p class="text-[11px] font-semibold text-stone-400">
+              {{ 'manager.items.categoriesHint' | translate }}
+            </p>
+
+            @if (categories().length > 0) {
+              <div class="mt-3 flex flex-wrap gap-2">
+                @for (category of categories(); track category._id) {
+                  <label
+                    class="inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition"
+                    [class.border-teal-300]="isCategorySelected(category._id)"
+                    [class.bg-teal-50]="isCategorySelected(category._id)"
+                    [class.text-teal-900]="isCategorySelected(category._id)"
+                    [class.border-stone-200]="!isCategorySelected(category._id)"
+                    [class.bg-white]="!isCategorySelected(category._id)"
+                    [class.text-stone-600]="!isCategorySelected(category._id)"
+                  >
+                    <input
+                      type="checkbox"
+                      class="h-4 w-4 rounded border-stone-300 text-teal-700 focus:ring-teal-500"
+                      [checked]="isCategorySelected(category._id)"
+                      (change)="toggleCategory(category._id)"
+                    />
+                    {{ category.name }}
+                  </label>
+                }
+              </div>
+            } @else {
+              <p
+                class="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800"
+              >
+                {{ 'manager.items.noCategories' | translate }}
+                <a routerLink="/manager/categories" class="underline">
+                  {{ 'manager.nav.categories' | translate }}
+                </a>
+              </p>
+            }
+
+            @if (categoryError()) {
+              <p class="mt-2 text-xs font-semibold text-rose-600">
+                {{ 'manager.items.selectCategoryError' | translate }}
+              </p>
+            }
+          </fieldset>
+
+          <div>
+            <label for="item-image-url" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.items.imageUrl' | translate }}
+            </label>
+            <input
+              id="item-image-url"
+              type="url"
+              formControlName="imageUrl"
+              placeholder="https://..."
+              class="w-full rounded-2xl border bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+              [class.border-stone-200]="!imageUrlControl.touched || imageUrlControl.valid"
+              [class.border-rose-300]="imageUrlControl.touched && imageUrlControl.invalid"
+            />
+            <p class="mt-1.5 text-[11px] font-semibold leading-5 text-stone-400">
+              {{ 'manager.items.imageUrlHint' | translate }}
+            </p>
+          </div>
+
+          <div>
+            <label for="item-image-file" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.items.imageFile' | translate }}
+            </label>
+            <input
+              id="item-image-file"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              class="block w-full rounded-2xl border border-stone-200 bg-stone-50/60 px-3 py-2.5 text-xs text-stone-600 file:me-3 file:rounded-full file:border-0 file:bg-teal-50 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-teal-800 hover:file:bg-teal-100"
+              (change)="onFileSelected($event)"
+            />
+            <p class="mt-1.5 text-[11px] font-semibold leading-5 text-stone-400">
+              {{ 'manager.items.imageFileHint' | translate }}
+            </p>
+            @if (imageError()) {
+              <p class="mt-1.5 text-xs font-semibold text-rose-600">{{ imageError() }}</p>
+            }
+          </div>
+
+          <div class="md:col-span-2">
+            <p class="mb-2 text-xs font-bold text-stone-600">
+              {{ (imageFile() ? 'manager.items.preview' : 'manager.items.currentImage') | translate }}
+            </p>
+
+            @if (imagePreviewUrl(); as previewUrl) {
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div class="aspect-[4/3] w-full max-w-xs overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
+                  <img
+                    [src]="previewUrl"
+                    [alt]="form.controls.name.value || 'Item image'"
+                    class="h-full w-full object-cover"
+                  />
+                </div>
+                @if (imageFile()) {
+                  <div class="space-y-2">
+                    <p class="text-xs font-semibold text-stone-500">
+                      {{ 'manager.items.selectedFile' | translate }}:
+                      <span class="text-stone-800">{{ imageFile()?.name }}</span>
+                    </p>
+                    <button
+                      type="button"
+                      class="rounded-full border border-stone-200 px-4 py-2 text-xs font-bold text-stone-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                      (click)="removeSelectedFile()"
+                    >
+                      {{ 'common.remove' | translate }}
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div
+                class="grid aspect-[4/3] w-full max-w-xs place-items-center rounded-2xl border border-dashed border-stone-300 bg-stone-50 text-xs font-semibold text-stone-400"
+              >
+                {{ 'items.noImage' | translate }}
+              </div>
+            }
+          </div>
+
+          <label
+            class="inline-flex cursor-pointer items-center gap-3 rounded-2xl border border-stone-200 bg-stone-50/60 px-4 py-3 md:col-span-2"
+          >
+            <input
+              type="checkbox"
+              formControlName="isHidden"
+              class="h-4 w-4 rounded border-stone-300 text-teal-700 focus:ring-teal-500"
+            />
+            <span class="text-sm font-semibold text-stone-700">
+              {{ 'manager.items.hideFromStore' | translate }}
+            </span>
+            <span
+              class="ms-auto rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide"
+              [class.bg-stone-200]="form.controls.isHidden.value"
+              [class.text-stone-600]="form.controls.isHidden.value"
+              [class.bg-emerald-50]="!form.controls.isHidden.value"
+              [class.text-emerald-700]="!form.controls.isHidden.value"
+            >
+              {{ (form.controls.isHidden.value ? 'manager.items.hidden' : 'manager.items.visible') | translate }}
+            </span>
+          </label>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 border-t border-stone-100 pt-5">
+          <button
+            type="submit"
+            class="rounded-full bg-teal-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-teal-900/20 transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500 disabled:shadow-none"
+            [disabled]="saving()"
+          >
+            {{ (editingItem() ? 'manager.items.update' : 'manager.items.save') | translate }}
+          </button>
+          <button
+            type="button"
+            class="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm font-bold text-stone-600 transition hover:bg-stone-50"
+            (click)="cancelForm()"
+          >
+            {{ 'common.cancel' | translate }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (loading()) {
+    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      @for (placeholder of [1, 2, 3, 4, 5, 6]; track placeholder) {
+        <div class="h-96 animate-pulse rounded-[1.75rem] border border-stone-200 bg-white/70"></div>
+      }
+    </div>
+  } @else if (loadError()) {
+    <div class="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-8 text-center">
+      <p class="font-bold text-rose-800">{{ 'manager.items.loadError' | translate }}</p>
+      <button
+        type="button"
+        class="mt-4 rounded-full bg-rose-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-rose-800"
+        (click)="loadData()"
+      >
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (items().length === 0) {
+    <div
+      class="rounded-[2rem] border border-dashed border-stone-300 bg-white/60 p-12 text-center"
+    >
+      <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-teal-50 text-teal-700">
+        <svg
+          class="h-7 w-7"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M20.25 7.5 12 3.75 3.75 7.5 12 11.25l8.25-3.75ZM3.75 7.5v9L12 20.25l8.25-3.75v-9M12 11.25v9"
+          />
+        </svg>
+      </div>
+      <p class="mt-4 text-lg font-bold text-stone-900">{{ 'manager.items.empty' | translate }}</p>
+      <p class="mt-2 text-sm text-stone-500">{{ 'manager.items.emptyHint' | translate }}</p>
+      <button
+        type="button"
+        class="mt-6 inline-flex rounded-full bg-teal-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800"
+        (click)="startCreate()"
+      >
+        {{ 'manager.items.new' | translate }}
+      </button>
+    </div>
+  } @else {
+    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      @for (item of items(); track item._id) {
+        <article
+          class="group flex flex-col overflow-hidden rounded-[1.75rem] border border-stone-200/80 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-xl hover:shadow-stone-900/5"
+          [class.opacity-60]="item.isHidden"
+        >
+          <div class="relative aspect-[4/3] overflow-hidden bg-stone-100">
+            @if (item.imageUrl) {
+              <img
+                [src]="item.imageUrl"
+                [alt]="item.name"
+                loading="lazy"
+                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              />
+            } @else {
+              <div
+                class="grid h-full w-full place-items-center bg-[radial-gradient(circle_at_30%_20%,#ccfbf1_0%,#f5f5f4_45%,#e7e5e4_100%)]"
+              >
+                <span class="text-5xl font-extrabold text-teal-800/25">س</span>
+              </div>
+            }
+
+            <div class="absolute start-3 top-3 flex flex-col items-start gap-1.5">
+              @if (item.isHidden) {
+                <span
+                  class="rounded-full bg-stone-900/85 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur"
+                >
+                  {{ 'manager.items.hidden' | translate }}
+                </span>
+              }
+              @if (item.quantity === 0) {
+                <span
+                  class="rounded-full bg-rose-600/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur"
+                >
+                  {{ 'manager.items.outOfStock' | translate }}
+                </span>
+              }
+            </div>
+          </div>
+
+          <div class="flex flex-1 flex-col p-5">
+            <div class="flex flex-wrap gap-1.5">
+              @if (item.categories.length > 0) {
+                @for (category of item.categories; track category._id) {
+                  <span
+                    class="rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-stone-600"
+                  >
+                    {{ category.name }}
+                  </span>
+                }
+              } @else {
+                <span
+                  class="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-700"
+                >
+                  {{ 'common.uncategorized' | translate }}
+                </span>
+              }
+            </div>
+
+            <h2 class="mt-3 text-lg font-bold leading-snug text-stone-900">{{ item.name }}</h2>
+
+            <div class="mt-4 flex items-end justify-between gap-3">
+              <p class="text-lg font-extrabold text-stone-900">
+                {{ item.price | number: '1.0-2' }}
+                <span class="text-xs font-bold text-stone-500">{{ 'common.currency' | translate }}</span>
+              </p>
+              <div class="text-end">
+                <p class="text-[10px] font-bold uppercase tracking-wide text-stone-400">
+                  {{ 'manager.items.quantity' | translate }}
+                </p>
+                <p class="mt-0.5 text-base font-extrabold text-stone-900">{{ item.quantity }}</p>
+              </div>
+            </div>
+
+            <div class="mt-auto flex flex-wrap items-center gap-2 border-t border-stone-100 pt-4">
+              <button
+                type="button"
+                class="rounded-full border border-stone-200 px-3 py-1.5 text-xs font-bold text-stone-600 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-800"
+                (click)="startEdit(item)"
+              >
+                {{ 'common.edit' | translate }}
+              </button>
+              <button
+                type="button"
+                class="rounded-full border border-stone-200 px-3 py-1.5 text-xs font-bold text-stone-600 transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-800 disabled:cursor-not-allowed disabled:opacity-50"
+                [disabled]="togglingId() === item._id"
+                (click)="toggleVisibility(item)"
+              >
+                {{ (item.isHidden ? 'manager.items.show' : 'manager.items.hide') | translate }}
+              </button>
+              <button
+                type="button"
+                class="ms-auto rounded-full border border-stone-200 px-3 py-1.5 text-xs font-bold text-stone-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+                [disabled]="deletingId() === item._id"
+                (click)="deleteItem(item)"
+              >
+                {{ 'common.delete' | translate }}
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>

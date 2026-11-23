@@ -1,0 +1,319 @@
+<div class="mx-auto w-full max-w-5xl space-y-6">
+  <header>
+    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-700">
+      {{ 'manager.label' | translate }}
+    </p>
+    <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-stone-900">
+      {{ 'manager.nav.settings' | translate }}
+    </h1>
+    <p class="mt-2 max-w-2xl text-sm leading-6 text-stone-500">
+      {{ 'manager.settings.subtitle' | translate }}
+    </p>
+  </header>
+
+  @if (feedback(); as feedback) {
+    <p
+      class="rounded-2xl border px-5 py-3 text-sm font-semibold"
+      [class.border-emerald-200]="feedback.type === 'success'"
+      [class.bg-emerald-50]="feedback.type === 'success'"
+      [class.text-emerald-800]="feedback.type === 'success'"
+      [class.border-rose-200]="feedback.type === 'error'"
+      [class.bg-rose-50]="feedback.type === 'error'"
+      [class.text-rose-800]="feedback.type === 'error'"
+      role="status"
+      aria-live="polite"
+    >
+      {{ feedback.message }}
+    </p>
+  }
+
+  @if (loading()) {
+    <div class="space-y-4">
+      <div class="h-56 animate-pulse rounded-[1.75rem] bg-stone-200"></div>
+      <div class="h-72 animate-pulse rounded-[1.75rem] bg-stone-200"></div>
+    </div>
+  } @else if (loadError()) {
+    <div class="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-8 text-center">
+      <p class="font-bold text-rose-800">{{ 'manager.settings.loadError' | translate }}</p>
+      <button
+        type="button"
+        class="mt-4 rounded-full bg-rose-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-rose-800"
+        (click)="loadSettings()"
+      >
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate class="space-y-5">
+      <section class="rounded-[1.75rem] border border-stone-200/80 bg-white p-6 shadow-sm sm:p-8">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-stone-900">
+              {{ 'manager.settings.stripeTitle' | translate }}
+            </h2>
+            <p class="mt-1 max-w-2xl text-sm leading-6 text-stone-500">
+              {{ 'manager.settings.stripeHint' | translate }}
+            </p>
+          </div>
+          <span
+            class="inline-flex w-fit rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide ring-1"
+            [class.bg-emerald-50]="settings()?.stripeSecretKeyConfigured"
+            [class.text-emerald-700]="settings()?.stripeSecretKeyConfigured"
+            [class.ring-emerald-200]="settings()?.stripeSecretKeyConfigured"
+            [class.bg-amber-50]="!settings()?.stripeSecretKeyConfigured"
+            [class.text-amber-700]="!settings()?.stripeSecretKeyConfigured"
+            [class.ring-amber-200]="!settings()?.stripeSecretKeyConfigured"
+          >
+            {{ (settings()?.stripeSecretKeyConfigured ? 'manager.settings.configured' : 'manager.settings.notConfigured') | translate }}
+          </span>
+        </div>
+
+        <div class="mt-6 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="stripe-secret" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.settings.stripeSecretKey' | translate }}
+            </label>
+            <input
+              id="stripe-secret"
+              type="password"
+              formControlName="stripeSecretKey"
+              autocomplete="new-password"
+              [placeholder]="settings()?.stripeSecretKeyConfigured ? ('manager.settings.secretConfiguredPlaceholder' | translate) : 'sk_test_...'"
+              class="w-full rounded-2xl border border-stone-200 bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+            />
+            <p class="mt-1.5 text-[11px] font-semibold text-stone-400">
+              {{ 'manager.settings.secretKeepHint' | translate }}
+            </p>
+            @if (settings()?.stripeSecretKeyConfigured) {
+              <label class="mt-2 flex items-center gap-2 text-xs font-semibold text-rose-700">
+                <input type="checkbox" formControlName="clearStripeSecretKey" class="h-4 w-4 rounded border-stone-300" />
+                {{ 'manager.settings.clearSecret' | translate }}
+              </label>
+            }
+          </div>
+
+          <div>
+            <label for="stripe-webhook" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.settings.stripeWebhookSecret' | translate }}
+            </label>
+            <input
+              id="stripe-webhook"
+              type="password"
+              formControlName="stripeWebhookSecret"
+              autocomplete="new-password"
+              [placeholder]="settings()?.stripeWebhookSecretConfigured ? ('manager.settings.secretConfiguredPlaceholder' | translate) : 'whsec_...'"
+              class="w-full rounded-2xl border border-stone-200 bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+            />
+            <p class="mt-1.5 text-[11px] font-semibold text-stone-400">
+              {{ 'manager.settings.secretKeepHint' | translate }}
+            </p>
+            @if (settings()?.stripeWebhookSecretConfigured) {
+              <label class="mt-2 flex items-center gap-2 text-xs font-semibold text-rose-700">
+                <input type="checkbox" formControlName="clearStripeWebhookSecret" class="h-4 w-4 rounded border-stone-300" />
+                {{ 'manager.settings.clearSecret' | translate }}
+              </label>
+            }
+          </div>
+
+          <div>
+            <label for="storefront-url" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.settings.storefrontUrl' | translate }}
+            </label>
+            <input
+              id="storefront-url"
+              type="url"
+              formControlName="storefrontUrl"
+              placeholder="http://localhost:4200"
+              class="w-full rounded-2xl border bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+              [class.border-stone-200]="!storefrontUrlControl.touched || storefrontUrlControl.valid"
+              [class.border-rose-300]="storefrontUrlControl.touched && storefrontUrlControl.invalid"
+            />
+            @if (storefrontUrlControl.touched && storefrontUrlControl.invalid) {
+              <p class="mt-1.5 text-xs font-semibold text-rose-600">
+                {{ 'manager.settings.urlInvalid' | translate }}
+              </p>
+            }
+          </div>
+
+          <div>
+            <label for="currency" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.settings.currency' | translate }}
+            </label>
+            <input
+              id="currency"
+              type="text"
+              formControlName="currency"
+              maxlength="3"
+              placeholder="egp"
+              class="w-full rounded-2xl border bg-stone-50/60 px-4 py-3 text-sm uppercase text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+              [class.border-stone-200]="!currencyControl.touched || currencyControl.valid"
+              [class.border-rose-300]="currencyControl.touched && currencyControl.invalid"
+            />
+            @if (currencyControl.touched && currencyControl.invalid) {
+              <p class="mt-1.5 text-xs font-semibold text-rose-600">
+                {{ 'manager.settings.currencyInvalid' | translate }}
+              </p>
+            }
+          </div>
+        </div>
+
+        <label class="mt-6 flex items-start gap-3 rounded-2xl border border-teal-100 bg-teal-50/50 p-4">
+          <input type="checkbox" formControlName="autoApproveOrders" class="mt-0.5 h-4 w-4 rounded border-stone-300" />
+          <span>
+            <span class="block text-sm font-bold text-stone-900">
+              {{ 'manager.settings.autoApproveTitle' | translate }}
+            </span>
+            <span class="mt-0.5 block text-xs leading-5 text-stone-500">
+              {{ 'manager.settings.autoApproveHint' | translate }}
+            </span>
+          </span>
+        </label>
+      </section>
+
+      <section class="rounded-[1.75rem] border border-stone-200/80 bg-white p-6 shadow-sm sm:p-8">
+        <div>
+          <h2 class="text-lg font-bold text-stone-900">
+            {{ 'manager.settings.smtpTitle' | translate }}
+          </h2>
+          <p class="mt-1 max-w-2xl text-sm leading-6 text-stone-500">
+            {{ 'manager.settings.smtpHint' | translate }}
+          </p>
+        </div>
+
+        <div class="mt-6 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="smtp-host" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.settings.smtpHost' | translate }}
+            </label>
+            <input
+              id="smtp-host"
+              type="text"
+              formControlName="smtpHost"
+              placeholder="smtp.example.com"
+              class="w-full rounded-2xl border border-stone-200 bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+            />
+          </div>
+
+          <div>
+            <label for="smtp-port" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.settings.smtpPort' | translate }}
+            </label>
+            <input
+              id="smtp-port"
+              type="number"
+              formControlName="smtpPort"
+              min="1"
+              max="65535"
+              class="w-full rounded-2xl border bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-teal-500 focus:bg-white"
+              [class.border-stone-200]="!smtpPortControl.touched || smtpPortControl.valid"
+              [class.border-rose-300]="smtpPortControl.touched && smtpPortControl.invalid"
+            />
+            @if (smtpPortControl.touched && smtpPortControl.invalid) {
+              <p class="mt-1.5 text-xs font-semibold text-rose-600">
+                {{ 'manager.settings.portInvalid' | translate }}
+              </p>
+            }
+          </div>
+
+          <div>
+            <label for="smtp-user" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.settings.smtpUser' | translate }}
+            </label>
+            <input
+              id="smtp-user"
+              type="text"
+              formControlName="smtpUser"
+              autocomplete="username"
+              class="w-full rounded-2xl border border-stone-200 bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+            />
+          </div>
+
+          <div>
+            <label for="smtp-password" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.settings.smtpPassword' | translate }}
+            </label>
+            <input
+              id="smtp-password"
+              type="password"
+              formControlName="smtpPassword"
+              autocomplete="new-password"
+              [placeholder]="settings()?.smtpPasswordConfigured ? ('manager.settings.secretConfiguredPlaceholder' | translate) : ''"
+              class="w-full rounded-2xl border border-stone-200 bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+            />
+            @if (settings()?.smtpPasswordConfigured) {
+              <label class="mt-2 flex items-center gap-2 text-xs font-semibold text-rose-700">
+                <input type="checkbox" formControlName="clearSmtpPassword" class="h-4 w-4 rounded border-stone-300" />
+                {{ 'manager.settings.clearSecret' | translate }}
+              </label>
+            }
+          </div>
+
+          <div>
+            <label for="smtp-from-name" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.settings.smtpFromName' | translate }}
+            </label>
+            <input
+              id="smtp-from-name"
+              type="text"
+              formControlName="smtpFromName"
+              class="w-full rounded-2xl border border-stone-200 bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+            />
+          </div>
+
+          <div>
+            <label for="smtp-from-email" class="mb-1.5 block text-xs font-bold text-stone-600">
+              {{ 'manager.settings.smtpFromEmail' | translate }}
+            </label>
+            <input
+              id="smtp-from-email"
+              type="email"
+              formControlName="smtpFromEmail"
+              placeholder="store@example.com"
+              class="w-full rounded-2xl border bg-stone-50/60 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-teal-500 focus:bg-white"
+              [class.border-stone-200]="!smtpFromEmailControl.touched || smtpFromEmailControl.valid"
+              [class.border-rose-300]="smtpFromEmailControl.touched && smtpFromEmailControl.invalid"
+            />
+            @if (smtpFromEmailControl.touched && smtpFromEmailControl.invalid) {
+              <p class="mt-1.5 text-xs font-semibold text-rose-600">
+                {{ 'manager.settings.emailInvalid' | translate }}
+              </p>
+            }
+          </div>
+        </div>
+
+        <label class="mt-5 flex items-start gap-3 rounded-2xl border border-stone-200 bg-stone-50/60 p-4">
+          <input type="checkbox" formControlName="smtpSecure" class="mt-0.5 h-4 w-4 rounded border-stone-300" />
+          <span>
+            <span class="block text-sm font-bold text-stone-900">
+              {{ 'manager.settings.smtpSecure' | translate }}
+            </span>
+            <span class="mt-0.5 block text-xs leading-5 text-stone-500">
+              {{ 'manager.settings.smtpSecureHint' | translate }}
+            </span>
+          </span>
+        </label>
+      </section>
+
+      <section class="rounded-[1.75rem] border border-amber-200/80 bg-amber-50/70 p-5 text-sm leading-6 text-amber-900">
+        <p class="font-bold">{{ 'manager.settings.webhookTitle' | translate }}</p>
+        <p class="mt-1">
+          {{ 'manager.settings.webhookHint' | translate }}
+          <code class="mt-2 block rounded-xl bg-white/70 px-3 py-2 font-mono text-xs">{{ webhookPath }}</code>
+        </p>
+      </section>
+
+      <div class="flex justify-end">
+        <button
+          type="submit"
+          class="inline-flex items-center gap-2 rounded-full bg-teal-700 px-6 py-3 text-sm font-bold text-white shadow-sm shadow-teal-900/20 transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="saving()"
+        >
+          @if (saving()) {
+            <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true"></span>
+          }
+          {{ (saving() ? 'manager.settings.saving' : 'manager.settings.save') | translate }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

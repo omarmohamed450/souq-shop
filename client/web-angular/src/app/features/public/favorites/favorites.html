@@ -1,0 +1,69 @@
+<section class="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-700">
+        {{ 'nav.favorites' | translate }}
+      </p>
+      <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-stone-900">
+        {{ 'favorites.title' | translate }}
+      </h1>
+    </div>
+    <p class="text-sm font-semibold text-stone-500">
+      {{ 'home.itemsCount' | translate: { count: favoriteItems().length } }}
+    </p>
+  </div>
+
+  @if (loading()) {
+    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+        <div class="h-80 animate-pulse rounded-[1.75rem] border border-stone-200 bg-white/70"></div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="mt-8 rounded-[1.75rem] border border-rose-200 bg-rose-50 p-8 text-center">
+      <p class="font-bold text-rose-800">{{ 'favorites.error' | translate }}</p>
+      <button
+        type="button"
+        class="mt-4 rounded-full bg-rose-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-rose-800"
+        (click)="loadFavorites()"
+      >
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else if (favoriteItems().length === 0) {
+    <div
+      class="mt-8 rounded-[2rem] border border-dashed border-stone-300 bg-white/60 p-12 text-center"
+    >
+      <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-rose-50 text-rose-600">
+        <svg
+          class="h-7 w-7"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+          />
+        </svg>
+      </div>
+      <p class="mt-4 text-lg font-bold text-stone-900">{{ 'favorites.emptyTitle' | translate }}</p>
+      <p class="mt-2 text-sm text-stone-500">{{ 'favorites.emptyHint' | translate }}</p>
+      <a
+        routerLink="/"
+        class="mt-6 inline-flex rounded-full bg-teal-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800"
+      >
+        {{ 'favorites.browse' | translate }}
+      </a>
+    </div>
+  } @else {
+    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      @for (item of favoriteItems(); track item._id) {
+        <app-item-card [item]="item" />
+      }
+    </div>
+  }
+</section>

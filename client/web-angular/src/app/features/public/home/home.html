@@ -1,0 +1,142 @@
+<section class="relative overflow-hidden">
+  <div class="mx-auto w-full max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+    <div
+      class="relative overflow-hidden rounded-[2rem] bg-stone-950 px-6 py-12 text-white shadow-2xl shadow-stone-900/20 sm:px-10 lg:px-14 lg:py-16"
+    >
+      <div
+        class="pointer-events-none absolute -end-16 -top-24 h-72 w-72 rounded-full bg-teal-500/20 blur-3xl"
+      ></div>
+      <div
+        class="pointer-events-none absolute -bottom-28 start-1/3 h-72 w-72 rounded-full bg-amber-400/10 blur-3xl"
+      ></div>
+      <div
+        class="pointer-events-none absolute inset-y-0 end-0 hidden w-1/2 opacity-20 lg:block"
+        aria-hidden="true"
+      >
+        <svg viewBox="0 0 400 400" class="h-full w-full" fill="none" stroke="currentColor">
+          <g stroke-width="1">
+            <circle cx="300" cy="120" r="120"></circle>
+            <circle cx="300" cy="120" r="90"></circle>
+            <circle cx="300" cy="120" r="60"></circle>
+            <path d="M180 120h240M300 0v240M215 35l170 170M385 35 215 205"></path>
+            <path d="M300 0l30 60h60l-30 60 30 60h-60l-30 60-30-60h-60l30-60-30-60h60z"></path>
+          </g>
+        </svg>
+      </div>
+
+      <div class="relative max-w-2xl">
+        <p class="text-[11px] font-bold uppercase tracking-[0.24em] text-teal-300">
+          {{ 'home.eyebrow' | translate }}
+        </p>
+        <h1 class="mt-4 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+          {{ 'home.title' | translate }}
+        </h1>
+        <p class="mt-5 max-w-xl text-base leading-8 text-stone-300 sm:text-lg">
+          {{ 'home.subtitle' | translate }}
+        </p>
+        <a
+          href="#catalog"
+          class="mt-8 inline-flex items-center gap-2 rounded-full bg-teal-500 px-6 py-3 text-sm font-bold text-stone-950 shadow-lg shadow-teal-950/30 transition hover:bg-teal-400"
+        >
+          {{ 'home.browse' | translate }}
+          <svg
+            class="h-4 w-4 rtl:rotate-180"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12l-7.5 7.5M3 12h18" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="catalog" class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-700">
+        {{ 'home.categories' | translate }}
+      </p>
+      <h2 class="mt-2 text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">
+        {{ 'home.allItems' | translate }}
+      </h2>
+    </div>
+    @if (!loading() && !error()) {
+      <p class="text-sm font-semibold text-stone-500">
+        {{ 'home.itemsCount' | translate: { count: filteredItems().length } }}
+      </p>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+        <div class="h-80 animate-pulse rounded-[1.75rem] border border-stone-200 bg-white/70"></div>
+      }
+    </div>
+  } @else if (error()) {
+    <div
+      class="mt-8 rounded-[1.75rem] border border-rose-200 bg-rose-50 p-8 text-center text-rose-800"
+    >
+      <p class="font-bold">{{ 'home.error' | translate }}</p>
+      <button
+        type="button"
+        class="mt-4 rounded-full bg-rose-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-rose-800"
+        (click)="loadStore()"
+      >
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  } @else {
+    <div class="mt-6 flex flex-wrap gap-2">
+      <button
+        type="button"
+        class="rounded-full border px-4 py-2 text-xs font-bold transition"
+        [class.border-teal-700]="selectedCategoryId() === null"
+        [class.bg-teal-700]="selectedCategoryId() === null"
+        [class.text-white]="selectedCategoryId() === null"
+        [class.border-stone-200]="selectedCategoryId() !== null"
+        [class.bg-white]="selectedCategoryId() !== null"
+        [class.text-stone-600]="selectedCategoryId() !== null"
+        (click)="selectCategory(null)"
+      >
+        {{ 'home.allItems' | translate }}
+      </button>
+
+      @for (category of categories(); track category._id) {
+        <button
+          type="button"
+          class="rounded-full border px-4 py-2 text-xs font-bold transition"
+          [class.border-teal-700]="selectedCategoryId() === category._id"
+          [class.bg-teal-700]="selectedCategoryId() === category._id"
+          [class.text-white]="selectedCategoryId() === category._id"
+          [class.border-stone-200]="selectedCategoryId() !== category._id"
+          [class.bg-white]="selectedCategoryId() !== category._id"
+          [class.text-stone-600]="selectedCategoryId() !== category._id"
+          (click)="selectCategory(category._id)"
+        >
+          {{ category.name }}
+        </button>
+      }
+    </div>
+
+    @if (filteredItems().length > 0) {
+      <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        @for (item of filteredItems(); track item._id) {
+          <app-item-card [item]="item" />
+        }
+      </div>
+    } @else {
+      <div
+        class="mt-8 rounded-[1.75rem] border border-dashed border-stone-300 bg-white/60 p-10 text-center"
+      >
+        <p class="text-lg font-bold text-stone-800">{{ 'home.emptyTitle' | translate }}</p>
+        <p class="mt-2 text-sm text-stone-500">{{ 'home.emptyHint' | translate }}</p>
+      </div>
+    }
+  }
+</section>
